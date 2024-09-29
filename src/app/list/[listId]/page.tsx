@@ -15,7 +15,7 @@ export default async function Lists({ params }: { params: { listId: number } }) 
         <div>
             <h1>Lists</h1>
             <ShoppingList
-                listId={params.listId}
+                list={list}
                 currentItems={list.items}
                 dbItems={allItems}
             />

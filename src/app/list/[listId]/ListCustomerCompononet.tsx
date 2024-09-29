@@ -1,18 +1,19 @@
 "use client"
 
-import { Item } from '@prisma/client/edge';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Item, List } from '@prisma/client/edge';
+import { Plus, ShoppingCart, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { addItemServerSide, addItemToList } from './serverComponent';
+import { addItemServerSide, addItemToList, removeItemFromList } from '../serverComponent';
+
 // Define an interface for the component props
 interface ShoppingListProps {
-  listId: number;
+  list: List;
   currentItems: Item[];
   dbItems: Item[];
 }
 
 
-export default function ShoppingList({ listId, currentItems, dbItems }: ShoppingListProps) {
+export default function ShoppingList({ list, currentItems, dbItems }: ShoppingListProps) {
   const [items, setItems] = useState<Item[]>([])
   const [allItems, setAllItems] = useState<Item[]>([])
   const [inputValue, setInputValue] = useState('')
@@ -21,27 +22,25 @@ export default function ShoppingList({ listId, currentItems, dbItems }: Shopping
   const dropdownRef = useRef<HTMLUListElement>(null)
 
   useEffect(() => {
-    // Initialize with some items
-    console.log("Initialaizing with items for listId: ", listId)
+    console.log("Initializing with items for listId: ", list.id)
     setItems(currentItems)
     setAllItems(dbItems)
-  }, [])
+  }, [list, currentItems, dbItems])
 
   const matchedItems = allItems.filter(item =>
-    item.name.toLowerCase().includes(inputValue.toLowerCase()) && !items.includes(item)
+    item.name.toLowerCase().includes(inputValue.toLowerCase()) && !items.some(i => i.id === item.id)
   )
 
   const addItem = (item: Item) => {
-    if (item && !items.includes(item)) {
+    if (item && !items.some(i => i.id === item.id)) {
       setItems(prevItems => [...prevItems, item])
-      if (!allItems.includes(item)) {
+      if (!allItems.some(i => i.id === item.id)) {
         setAllItems(prevAllItems => [...prevAllItems, item])
       }
       setInputValue('')
       setShowDropdown(false)
 
-      addItemToList(listId, item.id)
-
+      addItemToList(list.id, item.id)
     }
   }
 
@@ -50,6 +49,10 @@ export default function ShoppingList({ listId, currentItems, dbItems }: Shopping
     addItem(item)
   }
 
+  const removeItem = async (id: number) => {
+    setItems(prevItems => prevItems.filter(item => item.id !== id))
+    await removeItemFromList(list.id, id)
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value)
@@ -80,13 +83,25 @@ export default function ShoppingList({ listId, currentItems, dbItems }: Shopping
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold mb-4 flex items-center text-gray-800">
-          <ShoppingCart className="mr-2" />
-          Shopping List
+          {list.name}
         </h2>
         <ul className="space-y-2 mb-4 max-h-[60vh] overflow-y-auto">
-          {items.map((item, index) => (
-            <li key={index} className="bg-green-100 p-2 rounded-md">
-              {item.name}
+          {items.map((item) => (
+            <li
+              key={item.id}
+              className={`flex justify-between items-center bg-green-100 p-2 rounded-md`}
+            >
+              <span
+                className="cursor-pointer flex-grow"
+              >
+                {item.name}
+              </span>
+              <button
+                onClick={() => removeItem(item.id)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <X size={18} />
+              </button>
             </li>
           ))}
         </ul>
@@ -114,9 +129,9 @@ export default function ShoppingList({ listId, currentItems, dbItems }: Shopping
               ref={dropdownRef}
               className="absolute z-10 w-full bg-white border rounded-md mt-1 max-h-40 overflow-y-auto shadow-lg"
             >
-              {matchedItems.map((item, index) => (
+              {matchedItems.map((item) => (
                 <li
-                  key={index}
+                  key={item.id}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => addItem(item)}
                 >
