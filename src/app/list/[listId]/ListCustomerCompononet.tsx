@@ -1,17 +1,15 @@
 "use client"
 
 import { Item, List } from '@prisma/client/edge';
-import { Plus, ShoppingCart, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { addItemServerSide, addItemToList, removeItemFromList } from '../serverComponent';
 
-// Define an interface for the component props
 interface ShoppingListProps {
   list: List;
   currentItems: Item[];
   dbItems: Item[];
 }
-
 
 export default function ShoppingList({ list, currentItems, dbItems }: ShoppingListProps) {
   const [items, setItems] = useState<Item[]>([])
