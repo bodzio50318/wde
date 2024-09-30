@@ -3,7 +3,7 @@
 import { Item, List } from '@prisma/client/edge';
 import { Plus, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { addItemServerSide, addItemToList, removeItemFromList } from '../serverComponent';
+import { addItemServerSide, addItemToList, removeItemFromList } from '../../serverComponent';
 
 interface ShoppingListProps {
   list: List;
