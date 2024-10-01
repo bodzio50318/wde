@@ -18,7 +18,7 @@ export const deleteItem = async (itemId: number) => {
 };
 
 export const dbAddItem = async (formData: FormData) => {
-    const item = await prisma.item.create({
+    await prisma.item.create({
         data: {
             name: formData.get("name") as string,
             unitId: 0,

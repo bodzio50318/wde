@@ -19,7 +19,7 @@ interface Props {
 
 export default function ListManager({ listOflists }: Props) {
   const [lists, setLists] = useState<ExtendedList[]>(listOflists)
-  const [editingId, setEditingId] = useState<Number | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [editingName, setEditingName] = useState<string>("")
 
   const startEditing = (id: number, currentName: string) => {
